@@ -1,0 +1,301 @@
+/* ROI Simulator — 画面の見た目
+ * 方針: 背景は沖縄の海、内容は白いパネルの上にキチッとした文字で。アニメーションは使わない。
+ */
+:root {
+  --text: #0f2236;
+  --text-sub: #4b6074;
+  --line: #d5dfe8;
+  --panel: rgba(255, 255, 255, 0.95);
+  --field-bg: #ffffff;
+  --track: #d6e0e8;
+  --accent: #0d6aa3;
+  --accent-dark: #0a5786;
+  --pos: #0f7a52;
+  --neg: #c42121;
+  --bar-benefit: #1e9a63;
+  --bar-initial: #8693a0;
+  --bar-annual: #e8891a;
+  --radius: 14px;
+  --font: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP",
+          "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background: #bfe6f4;            /* 画像が読めないときの色 */
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 背景（固定。iOS は background-attachment: fixed が効かないので要素で敷く） */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #bfe6f4 url("../img/okinawa-sea.svg") center top / cover no-repeat;
+}
+
+/* ---------- 見出し ---------- */
+.app-header {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(26px + env(safe-area-inset-top)) 20px 0;
+  min-height: 236px;
+}
+.app-header h1 { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.title-en {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #0a2b48;
+  line-height: 1.15;
+}
+.title-ja {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1d3f5d;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px calc(28px + env(safe-area-inset-bottom));
+}
+
+/* ---------- パネル ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 10px rgba(8, 52, 86, 0.12);
+  padding: 18px 16px;
+  margin-bottom: 14px;
+}
+.panel h2 {
+  margin: 0 0 14px;
+  padding-left: 10px;
+  border-left: 4px solid var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+}
+.h-note { font-size: 12px; font-weight: 400; color: var(--text-sub); letter-spacing: 0; margin-left: 6px; }
+
+/* ---------- 案件名 ---------- */
+.project-label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.04em; }
+.optional {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 4px;
+  background: #e8eef3; color: var(--text-sub); font-size: 11px; font-weight: 700; vertical-align: 1px;
+}
+.project-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 16px;               /* 16px 未満だと iOS が自動で拡大する */
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid #c3cfda;
+  border-radius: 10px;
+}
+
+/* ---------- 入力項目 ---------- */
+.fields { display: flex; flex-direction: column; gap: 18px; }
+.field { padding-bottom: 16px; border-bottom: 1px solid #e6ecf1; }
+.field:last-child { padding-bottom: 0; border-bottom: 0; }
+.field-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+}
+.field-label { font-size: 14.5px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.35; }
+.num {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  background: var(--field-bg);
+  border: 1px solid #c3cfda;
+  border-radius: 10px;
+  padding-right: 10px;
+}
+.num:focus-within, .project-input:focus { border-color: var(--accent); outline: 2px solid rgba(13, 106, 163, 0.18); }
+.num input {
+  width: 7.2em;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0 6px 0 10px;
+  font: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.num .unit { min-width: 2.3em; font-size: 13px; font-weight: 700; color: var(--text-sub); }
+.field.invalid .num { border-color: var(--neg); }
+.field-hint { margin: 8px 0 0; font-size: 12px; color: var(--text-sub); line-height: 1.55; }
+.field-error { margin: 6px 0 0; font-size: 12px; font-weight: 700; color: var(--neg); }
+
+/* スライドバー（指で操作しやすい太さ・大きいつまみ） */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 8px 0 0;
+  background: transparent;
+  cursor: pointer;
+  --pct: 0%;
+}
+.range:focus { outline: none; }
+.range:focus-visible { outline: 2px solid rgba(13, 106, 163, 0.35); outline-offset: 2px; border-radius: 8px; }
+.range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--accent) 0, var(--accent) var(--pct), var(--track) var(--pct), var(--track) 100%);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 30px;
+  height: 30px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--accent);
+  box-shadow: 0 1px 4px rgba(8, 52, 86, 0.3);
+}
+.range::-moz-range-track { height: 8px; border-radius: 4px; background: var(--track); }
+.range::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--accent); }
+.range::-moz-range-thumb {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #ffffff; border: 3px solid var(--accent); box-shadow: 0 1px 4px rgba(8, 52, 86, 0.3);
+}
+.range-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* ---------- 試算結果カード（2 列 × 2 段） ---------- */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.card {
+  container-type: inline-size;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 12px 14px;
+}
+.card-label { font-size: 12.5px; font-weight: 700; color: var(--text-sub); letter-spacing: 0.02em; line-height: 1.35; min-height: 2.7em; }
+.card-value {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 4px;
+  min-width: 0;
+}
+.card-num {
+  /* --len（文字幅の目安）が長いほど小さくする。カード幅を超えない */
+  font-size: clamp(14px, calc(100cqi / (var(--len, 5) * 0.62 + 1.6)), 32px);
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.card-unit { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+.card[data-tone="pos"] .card-num { color: var(--pos); }
+.card[data-tone="neg"] .card-num { color: var(--neg); }
+
+/* ---------- 横棒グラフ ---------- */
+.chart { display: flex; flex-direction: column; gap: 14px; }
+.bar-label { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.bar-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 10px; }
+.bar-track { height: 16px; border-radius: 4px; background: #edf1f5; overflow: hidden; min-width: 40px; }
+.bar-fill { height: 100%; width: 0; border-radius: 4px; }
+.bar-fill.benefit { background: var(--bar-benefit); }
+.bar-fill.initial { background: var(--bar-initial); }
+.bar-fill.annual  { background: var(--bar-annual); }
+.bar-value {
+  max-width: 11em;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.bar-value .u { font-size: 11.5px; color: var(--text-sub); margin-left: 3px; }
+
+/* ---------- ボタン ---------- */
+.actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; margin: 4px 0 14px; }
+.btn {
+  height: 52px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary { background: var(--accent); color: #ffffff; border: 1px solid var(--accent-dark); }
+.btn-primary:active { background: var(--accent-dark); }
+.btn-secondary { background: #ffffff; color: var(--text); border: 1px solid #b9c7d3; }
+.btn-secondary:active { background: #eef3f7; }
+
+/* ---------- 注意事項 ---------- */
+.notes {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #34495d;
+}
+.notes p { margin: 0 0 8px; }
+.notes p:last-child { margin-bottom: 0; }
+.notes .meta { color: var(--text-sub); font-size: 11.5px; }
+.notes .meta span { margin-left: 8px; }
+
+/* ---------- 完了メッセージ ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: #10324f;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+.toast.error { background: var(--neg); }
+
+/* 広い画面（iPad・PC）では余白を少し広げるだけ */
+@media (min-width: 700px) {
+  .app-header { min-height: 300px; padding-top: calc(40px + env(safe-area-inset-top)); }
+  .title-en { font-size: 36px; }
+  .panel { padding: 22px 22px; }
+}
