@@ -25,6 +25,8 @@ const CHROME = [
   '/usr/bin/google-chrome',
 ].filter(Boolean).find(p => fs.existsSync(p));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+/** 今の版（js/app.js の APP_VERSION） */
+const VER = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8').match(/APP_VERSION = '([^']+)'/)[1];
 
 // ---------- 試験用の配信（更新試験のときだけ版を差し替える） ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -39,7 +41,7 @@ function startServer() {
       const file = path.join(ROOT, p);
       if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end(); }
       let body = fs.readFileSync(file);
-      if (nextVersion && (p === '/sw.js' || p === '/js/app.js')) body = Buffer.from(body.toString().replace(/'1\.0\.0'/g, `'${nextVersion}'`));
+      if (nextVersion && (p === '/sw.js' || p === '/js/app.js')) body = Buffer.from(body.toString().split(`'${VER}'`).join(`'${nextVersion}'`));
       res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
       res.end(body);
     });
@@ -224,9 +226,9 @@ async function shot(name, width, height, mobile, scrollTo) {
     await ev('navigator.serviceWorker.ready.then(() => true)');
     await reload();
     const info = await ev(`(async () => ({ controlled: !!navigator.serviceWorker.controller, keys: await caches.keys(),
-      n: (await (await caches.open('roi-simulator-1.0.0')).keys()).length }))()`);
+      n: (await (await caches.open('roi-simulator-${VER}')).keys()).length }))()`);
     ok(info.controlled, 'Service Worker が画面を制御していない');
-    eq(info.keys, ['roi-simulator-1.0.0'], 'キャッシュ名');
+    eq(info.keys, [`roi-simulator-${VER}`], 'キャッシュ名');
     eq(info.n, 13, 'キャッシュしたファイル数');
     return `キャッシュ ${info.n} ファイル`;
   });
@@ -415,7 +417,7 @@ async function shot(name, width, height, mobile, scrollTo) {
     await setAll({ casesPerMonth: 3000 });
     const s = await snapshot();
     eq(cardTexts(s), ['6,000', '3,000', '2,900', '0.17'], 'オフラインでの結果');
-    const bg = await ev(`new Promise(r => { const i = new Image(); i.onload = () => r(true); i.onerror = () => r(false); i.src = './img/okinawa-sea.svg?x=1'; })`);
+    const bg = await ev(`new Promise(r => { const i = new Image(); i.onload = () => r(true); i.onerror = () => r(false); i.src = './img/okinawa-sea.webp?x=1'; })`);
     ok(bg, '背景画像がオフラインで出ない');
     await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     await startServer();
@@ -425,26 +427,26 @@ async function shot(name, width, height, mobile, scrollTo) {
 
   await test('アプリ更新後に新しい版になり、古いキャッシュが消える', async () => {
     await ev(`caches.open('tire-pressure-v3').then(() => true)`);        // 同じ住所の他アプリのキャッシュ（消えてはいけない）
-    nextVersion = '1.0.1-test';
+    nextVersion = VER + '-next';
     await reload();                                                      // 古い版で開く → 裏で新しい版を検出 → 自動で 1 回読み直す
     let s;
     for (let i = 0; i < 40; i++) {
       await sleep(250);
-      try { s = await snapshot(); if (s.version === 'v1.0.1-test') break; } catch (e) { /* 読み直し中 */ }
+      try { s = await snapshot(); if (s.version === 'v' + nextVersion) break; } catch (e) { /* 読み直し中 */ }
     }
-    eq(s.version, 'v1.0.1-test', '表示中の版');
+    eq(s.version, 'v' + nextVersion, '表示中の版');
     const keys = await ev('caches.keys()');
-    eq(keys.slice().sort(), ['roi-simulator-1.0.1-test', 'tire-pressure-v3'], 'キャッシュ（古い版だけ消える）');
+    eq(keys.slice().sort(), [`roi-simulator-${nextVersion}`, 'tire-pressure-v3'], 'キャッシュ（古い版だけ消える）');
     eq(cardTexts(s), ['3,000', '1,500', '1,400', '0.36'], '更新後の計算');
     nextVersion = null;                                                  // 元の版に戻す（以降の試験と画面写真のため）
     await reload();
     for (let i = 0; i < 40; i++) {
       await sleep(250);
-      try { s = await snapshot(); if (s.version === 'v1.0.0') break; } catch (e) { /* 読み直し中 */ }
+      try { s = await snapshot(); if (s.version === 'v' + VER) break; } catch (e) { /* 読み直し中 */ }
     }
-    eq(s.version, 'v1.0.0', '元の版に戻る');
+    eq(s.version, 'v' + VER, '元の版に戻る');
     await ev(`caches.delete('tire-pressure-v3')`);
-    return '開き直し 1 回で v1.0.0 → v1.0.1-test（→ v1.0.0 に戻す）・他アプリのキャッシュは残る';
+    return `開き直し 1 回で v${VER} → v${VER}-next（→ v${VER} に戻す）・他アプリのキャッシュは残る`;
   });
 
   await test('素の 127.0.0.1 では Service Worker を登録しない（他アプリと競合しない）', async () => {

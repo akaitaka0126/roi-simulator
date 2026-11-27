@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-26T23:55:13.534Z",
+  "date": "2026-11-27T00:09:12.761Z",
   "chrome": "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "results": [
     {
@@ -85,7 +85,7 @@
     {
       "name": "アプリ更新後に新しい版になり、古いキャッシュが消える",
       "ok": true,
-      "detail": "開き直し 1 回で v1.0.0 → v1.0.1-test（→ v1.0.0 に戻す）・他アプリのキャッシュは残る"
+      "detail": "開き直し 1 回で v1.0.1 → v1.0.1-next（→ v1.0.1 に戻す）・他アプリのキャッシュは残る"
     },
     {
       "name": "素の 127.0.0.1 では Service Worker を登録しない（他アプリと競合しない）",

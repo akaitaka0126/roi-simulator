@@ -7,7 +7,7 @@
   const Fmt = window.RoiFormat;
 
   /** ★更新したら sw.js の VERSION と同じ値にそろえる */
-  const APP_VERSION = '1.0.0';
+  const APP_VERSION = '1.0.1';
   /** 保存の名前。同じ住所に置く他のアプリ（例: tire-pressure-app）と重ならない名前にする */
   const STORAGE_KEY = 'roi-simulator.state';
   const SCHEMA = 1;

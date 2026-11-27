@@ -3,7 +3,7 @@
  * ★アプリを更新したら VERSION を上げる（js/app.js の APP_VERSION と同じ値）。
  *   新しい版が入ると古い版のキャッシュは自動で消え、開いている画面は 1 回だけ読み直される。
  */
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const CACHE_PREFIX = 'roi-simulator-';            // 同じ住所に置く他のアプリのキャッシュとは名前で分ける
 const CACHE_NAME = CACHE_PREFIX + VERSION;
 const ASSETS = [
@@ -14,7 +14,7 @@ const ASSETS = [
   './js/calc.js',
   './js/format.js',
   './js/app.js',
-  './img/okinawa-sea.svg',
+  './img/okinawa-sea.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

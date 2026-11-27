@@ -29,16 +29,15 @@
 | ファイル | 役割 |
 |---|---|
 | `index.html` | 画面の骨組み（タイトル → 案件名 → 入力 5 項目 → 結果カード → グラフ → リセット・コピー → 注意事項） |
-| `css/app.css` | 見た目（沖縄の海の背景・白いパネル・大きいスライダー） |
+| `css/app.css` | 見た目（沖縄の海の写真の背景・白いパネル・大きいスライダー） |
 | `js/calc.js` | **計算ロジック**（画面に依存しない。Node からも使える） |
 | `js/format.js` | **表示用の丸めと文字の整形**（画面とコピー文が同じ関数を使う） |
 | `js/app.js` | 画面の動き（入力の同期・表示・保存・リセット・コピー・Service Worker の登録） |
 | `sw.js` | Service Worker（オフライン対応・版ごとのキャッシュ） |
 | `manifest.webmanifest` | アプリ名・アイコン・全画面表示の設定 |
-| `img/okinawa-sea.svg` | 背景（沖縄の海・人物なし。14KB のベクター画像） |
+| `img/okinawa-sea.webp` | 背景（沖縄の海の写真・人物なし。Koji 提供の写真を 1333×2000・約 240KB の WebP にしたもの） |
 | `icons/` | アプリアイコン（192 / 512 / maskable 512 / iOS 用 180 / favicon 32） |
 | `tools/serve.py` | 手元で動かす確認用サーバー（Python 標準ライブラリのみ） |
-| `tools/make_background.py` | 背景画像を作り直すスクリプト |
 | `tools/make_icons.py` | アイコンを作り直すスクリプト（Pillow が必要） |
 | `tests/unit.test.js` | 計算の単体試験（Node） |
 | `tests/e2e.test.js` | 実ブラウザ（Chrome）での機能試験 |
