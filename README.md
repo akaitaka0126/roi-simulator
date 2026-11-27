@@ -6,6 +6,7 @@
 - 計算はすべて端末の中で行い、入力内容を外部へ送りません（ログイン・外部 API・データベースなし）。
 - 一度開けば、オフラインでも使えます。
 - 対応: iPhone / Android / iPad / PC（スマートフォン縦画面を優先）。
+- **公開 URL: https://akaitaka0126.github.io/roi-simulator/** （GitHub `akaitaka0126/roi-simulator`・2026-11-27 公開）
 
 ---
 
